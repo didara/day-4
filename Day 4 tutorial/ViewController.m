@@ -64,9 +64,13 @@
     
     NSURL *url = [[NSURL alloc] initWithString: urlString];
     
+    NSLog(@"%s, Started downloading", __FUNCTION__);
     NSURLRequest *request = [[NSURLRequest alloc] initWithURL:url];
+    
     NSURLSessionDownloadTask *task = [session downloadTaskWithRequest:request completionHandler:^(NSURL *location, NSURLResponse *response, NSError *error) {
        
+        NSLog(@"%s, Ended", __FUNCTION__);
+        
         NSData *data = [[NSData alloc] initWithContentsOfURL: location];
         NSDictionary *responseDictionary = [NSJSONSerialization JSONObjectWithData:data options:kNilOptions error: nil];
         NSLog(@" response dictionary is : %@", responseDictionary);
@@ -78,11 +82,10 @@
             
         });
     
-    
     }];
     
 
-[task resume];
+    [task resume];
 }
 
                        
@@ -95,6 +98,7 @@
 
 -(NSInteger) collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
 {
+    
     return [self.photos count];
 }
 -(UICollectionViewCell *) collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath

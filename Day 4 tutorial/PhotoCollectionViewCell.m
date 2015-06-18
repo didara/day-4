@@ -7,10 +7,11 @@
 //
 
 #import "PhotoCollectionViewCell.h"
+#import "PhotoController.h"
 
 @implementation PhotoCollectionViewCell
 
--( instancetype) initWithFrame:(CGRect)frame;
+-(instancetype) initWithFrame:(CGRect)frame;
 {
     self= [super initWithFrame:frame];
     
@@ -30,9 +31,19 @@
 -(void)setPhoto:(NSDictionary *)photo
 {
     _photo=photo;
-   
-    [self downloadImage];
+    
+    [PhotoController imageForPhoto:self.photo size:@"thumbnail" completion:^(UIImage *image) {
+        self.imageView.image = image;
+        
+    }];
+    
+//    [PhotoController imageForPhoto:self.photo size:@"thumbnail" completion:^void *(UIImage *) {
+//        
+//    }];
+  
 }
+
+
 
 -(void) downloadImage
 {
