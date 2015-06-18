@@ -13,6 +13,8 @@
 @interface ViewController () <UICollectionViewDataSource, UICollectionViewDelegate>
 @property (weak, nonatomic) IBOutlet UICollectionView *collectionView;
 @property (nonatomic) NSString *accessToken;
+@property (nonatomic) NSMutableArray *photos;
+
 
 @end
 
@@ -33,13 +35,13 @@
             [userDefaults synchronize];
             NSLog (@"saved credentials");
             
-            [self downloadImages];
+            [self downloadImage];
         
         }];
     }else {
         
             NSLog(@"using previous credentials");
-        
+            [self downloadImage];
         }
     }
 
@@ -53,27 +55,37 @@
 
 #pragma mark  - helper methods 
 
--(void) downloadImages
+-(void) downloadImage
 {
+    
     NSURLSession *session = [NSURLSession sharedSession];
-    NSString *urlString = [[NSString alloc] initWithFormat: @"https://api.instagram.com/v1/tags/Didara/media/recent?access_token=%@", self.accessToken];
+    NSString *urlString = [[NSString alloc] initWithFormat: @"https://api.instagram.com/v1/tags/KZ/media/recent?access_token=%@", self.accessToken];
   //  NSLog (@"%@", urlString);
     
     NSURL *url = [[NSURL alloc] initWithString: urlString];
     
     NSURLRequest *request = [[NSURLRequest alloc] initWithURL:url];
     NSURLSessionDownloadTask *task = [session downloadTaskWithRequest:request completionHandler:^(NSURL *location, NSURLResponse *response, NSError *error) {
-    //    NSLog(@"response is :%@, response");
+       
         NSData *data = [[NSData alloc] initWithContentsOfURL: location];
         NSDictionary *responseDictionary = [NSJSONSerialization JSONObjectWithData:data options:kNilOptions error: nil];
-        
-        NSLog(@"response dictionary is: %@", responseDictionary);
-        
-        
+        NSLog(@" response dictionary is : %@", responseDictionary);
+
+        self.photos = responseDictionary[@"data"];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self.collectionView reloadData];
+            
+            
+        });
+    
+    
     }];
     
-    [task resume];
+
+[task resume];
 }
+
+                       
 #pragma mark - UICollectionView methods;
 
 - (NSInteger) numberOfSectionsInCollectionView:(UICollectionView *)collectionView;
@@ -83,13 +95,21 @@
 
 -(NSInteger) collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
 {
-    return 10;
+    return [self.photos count];
 }
 -(UICollectionViewCell *) collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
 {
     PhotoCollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"Cell"
         forIndexPath:indexPath];
-    cell.imageView.image = [UIImage imageNamed:@"lookImage.jpeg"];
+    
+
+  //   cell.imageView.image = [UIImage imageNamed:@"lookImage.jpeg"];
+    
+
+    
+    NSDictionary *photo = self.photos[indexPath.row];
+    cell.photo = photo;
+    
     return cell;
 }
 
